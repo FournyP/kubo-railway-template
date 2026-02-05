@@ -1,24 +1,18 @@
 FROM ipfs/kubo:v0.39.0
 
 ENV DATA_PATH=/data/ipfs
-ARG KUBO_SWARM_TCP_ADDRESS_IPV4="/ip4/0.0.0.0/tcp/4001"
-ARG KUBO_SWARM_TCP_ADDRESS_IPV6="/ip6/::/tcp/4001"
-ARG KUBO_SWARM_UDP_ADDRESS_IPV4="/ip4/0.0.0.0/udp/4001/quic"
-ARG KUBO_SWARM_UDP_ADDRESS_IPV6="/ip6/::/udp/4001/quic"
-ARG KUBO_ANNOUNCE="/ip4/0.0.0.0/tcp/4001"
-ARG KUBO_API_ADDRESS="/ip4/0.0.0.0/tcp/5001"
-
-ENV KUBO_SWARM_TCP_ADDRESS_IPV4=$KUBO_SWARM_TCP_ADDRESS_IPV4
-ENV KUBO_SWARM_TCP_ADDRESS_IPV6=$KUBO_SWARM_TCP_ADDRESS_IPV6
-ENV KUBO_SWARM_UDP_ADDRESS_IPV4=$KUBO_SWARM_UDP_ADDRESS_IPV4
-ENV KUBO_SWARM_UDP_ADDRESS_IPV6=$KUBO_SWARM_UDP_ADDRESS_IPV6
-ENV KUBO_ANNOUNCE=$KUBO_ANNOUNCE
-ENV KUBO_API_ADDRESS=$KUBO_API_ADDRESS
+ENV KUBO_SWARM_TCP_ADDRESS_IPV4=/ip4/0.0.0.0/tcp/4001
+ENV KUBO_SWARM_TCP_ADDRESS_IPV6=/ip6/::/tcp/4001
+ENV KUBO_SWARM_UDP_ADDRESS_IPV4=/ip4/0.0.0.0/udp/4001/quic
+ENV KUBO_SWARM_UDP_ADDRESS_IPV6=/ip6/::/udp/4001/quic
+ENV KUBO_ANNOUNCE=/ip4/0.0.0.0/tcp/4001
+ENV KUBO_API_ADDRESS=/ip4/0.0.0.0/tcp/5001
 
 # Use kubo.config.sh to generate the configuration
-COPY kubo.config.sh /tmp/kubo.config.sh
+COPY --chmod=755 kubo.config.sh /tmp/kubo.config.sh
 
-RUN chmod +x /tmp/kubo.config.sh
-
-# Expose ports for Kubo and Caddy
+# Expose ports for Kubo
 EXPOSE 4001 5001
+
+ENTRYPOINT ["/bin/sh", "-c"]
+CMD ["/tmp/kubo.config.sh && exec ipfs daemon --migrate=true --agent-version-suffix=docker"]

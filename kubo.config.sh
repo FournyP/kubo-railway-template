@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
@@ -24,5 +24,5 @@ ipfs config Addresses.Swarm "[\"${KUBO_SWARM_TCP_ADDRESS_IPV4}\", \"${KUBO_SWARM
 ipfs config Addresses.Announce "[\"${KUBO_ANNOUNCE}\"]" --json
 ipfs config Addresses.API "[\"${KUBO_API_ADDRESS}\"]" --json
 ipfs config Routing.Type "dht"
-ipfs config Reprovider.Interval "30m"
-ipfs config Reprovider.Strategy "all"
+ipfs config Provide.DHT.Interval "30m"
+ipfs config Provide.Strategy "all"
