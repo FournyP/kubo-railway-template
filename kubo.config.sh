@@ -18,14 +18,6 @@ else
   echo "Repo format version: (missing)"
 fi
 
-# Initialize IPFS if not already initialized
-if [ ! -f "$IPFS_PATH/config" ]; then
-  echo "Initializing IPFS..."
-  ipfs init --repo-dir="$IPFS_PATH"
-else
-  echo "IPFS already initialized."
-fi
-
 # Merge or update the config.json file
 ipfs --repo-dir="$IPFS_PATH" config Addresses.Swarm "[\"${KUBO_SWARM_TCP_ADDRESS_IPV4}\", \"${KUBO_SWARM_TCP_ADDRESS_IPV6}\", \"${KUBO_SWARM_UDP_ADDRESS_IPV4}\", \"${KUBO_SWARM_UDP_ADDRESS_IPV6}\"]" --json
 ipfs --repo-dir="$IPFS_PATH" config Addresses.Announce "[\"${KUBO_ANNOUNCE}\"]" --json

@@ -16,5 +16,6 @@ This example deploys a server of [Kubo](https://github.com/ipfs/kubo).
 
 ## 📝 Notes
 
+- This template uses Kubo's `/container-init.d` hooks and keeps the official entrypoint/CMD.
 - Source repo: https://github.com/FournyP/kubo-railway-template
 - Docs: https://docs.ipfs.tech/how-to
