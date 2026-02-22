@@ -11,6 +11,13 @@ echo "KUBO_ANNOUNCE: $KUBO_ANNOUNCE"
 echo "KUBO_API_ADDRESS: $KUBO_API_ADDRESS"
 echo "IPFS_PATH: $IPFS_PATH"
 
+echo "Kubo binary version: $(ipfs version)"
+if [ -f "$IPFS_PATH/version" ]; then
+  echo "Repo format version: $(cat "$IPFS_PATH/version")"
+else
+  echo "Repo format version: (missing)"
+fi
+
 # Initialize IPFS if not already initialized
 if [ ! -f "$IPFS_PATH/config" ]; then
   echo "Initializing IPFS..."
