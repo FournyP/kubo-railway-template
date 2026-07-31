@@ -39,6 +39,12 @@ secrets.
 Note: tokens are trusted — anyone holding one shares the same node, and IPFS has
 no read privacy, so encrypt sensitive data before adding.
 
+## 🌐 API listen addresses
+
+`KUBO_API_ADDRESSES` (JSON array) defaults to
+`["/ip4/0.0.0.0/tcp/5001", "/ip6/::/tcp/5001"]` — keep both on Railway (the
+public proxy is IPv4, the private network IPv6).
+
 ## 📝 Notes
 
 - This template uses Kubo's `/container-init.d` hooks and keeps the official entrypoint/CMD.

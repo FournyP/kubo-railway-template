@@ -6,7 +6,7 @@ ENV KUBO_SWARM_TCP_ADDRESS_IPV6=/ip6/::/tcp/4001
 ENV KUBO_SWARM_UDP_ADDRESS_IPV4=/ip4/0.0.0.0/udp/4001/quic
 ENV KUBO_SWARM_UDP_ADDRESS_IPV6=/ip6/::/udp/4001/quic
 ENV KUBO_ANNOUNCE=/ip4/0.0.0.0/tcp/4001
-ENV KUBO_API_ADDRESS=/ip6/::/tcp/5001
+ENV KUBO_API_ADDRESSES='["/ip4/0.0.0.0/tcp/5001", "/ip6/::/tcp/5001"]'
 
 COPY --chmod=755 entrypoint.override.sh /entrypoint.override.sh
 
