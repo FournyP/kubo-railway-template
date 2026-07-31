@@ -45,6 +45,16 @@ no read privacy, so encrypt sensitive data before adding.
 `["/ip4/0.0.0.0/tcp/5001", "/ip6/::/tcp/5001"]` — keep both on Railway (the
 public proxy is IPv4, the private network IPv6).
 
+## 🔁 Pin migration
+
+`scripts/migrate-pins.sh` copies all recursive pins from one node to another
+(`dag export`/`dag import`). Data transfer only — both nodes must already be
+configured and reachable:
+
+```bash
+SRC_TOKEN=... DST_TOKEN=... ./scripts/migrate-pins.sh https://old-node https://new-node [--list]
+```
+
 ## 📝 Notes
 
 - This template uses Kubo's `/container-init.d` hooks and keeps the official entrypoint/CMD.
