@@ -50,3 +50,7 @@ public proxy is IPv4, the private network IPv6).
 - This template uses Kubo's `/container-init.d` hooks and keeps the official entrypoint/CMD.
 - Source repo: https://github.com/FournyP/kubo-railway-template
 - Docs: https://docs.ipfs.tech/how-to
+
+## ⚖️ License
+
+[MIT](LICENSE)
