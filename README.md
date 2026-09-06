@@ -14,6 +14,38 @@ This example deploys a server of [Kubo](https://github.com/ipfs/kubo).
 - Fill in the variables
 - Deploy! 🚄
 
+## 🧱 Infrastructure as Code
+
+`.railway/railway.ts` defines the whole project — the node, its volume and every variable.
+
+```bash
+railway link
+npm install
+
+# First apply only; later runs omit this and preserve() keeps the value.
+export KUBO_API_AUTH_SECRET=$(openssl rand -hex 32)
+
+npm run plan     # read the diff before applying
+npm run apply
+railway domain --service kubo
+```
+
+The swarm port (`4001`) needs a TCP proxy, which IaC does not cover. Add one in the
+dashboard and set `KUBO_ANNOUNCE` to the address it gives you; the default is only
+reachable inside Railway.
+
+Needs the Railway CLI 5.42.1 or newer: the IaC engine ships in the CLI, not in the npm
+package. If you forked this repo, change `REPO` in `railway.ts` to your own before applying.
+
+Link it to a project dedicated to this template. An apply deletes every resource **and
+every variable** the file does not declare, so from then on variables live in `railway.ts`,
+not the dashboard. Do not point it at a project created from the deploy button — the
+service names differ, and a mismatch is a delete and recreate, not a rename.
+
+## ⬆️ Upgrading
+
+Railway template updates are opt-in — an existing deployment keeps running until you apply the update. See the [changelog](CHANGELOG.md) for what each update contains.
+
 ## 🔐 Authentication
 
 The RPC API (port `5001`) is admin-level — protect it before exposing it.
