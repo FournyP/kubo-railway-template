@@ -1,0 +1,100 @@
+# Builds the Kubo image on every PR and on main, and boots it to check that the
+# container-init scripts produce a working repo and RPC API.
+name: docker-build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build kubo
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: false
+          cache-from: type=gha,scope=kubo
+          cache-to: type=gha,mode=max,scope=kubo
+
+  # kubo.config.sh and kubo.migrate.sh run at container start, against a repo
+  # that does not exist yet on first boot. Neither is covered by the image
+  # build succeeding, so boot the real image and check what they produced.
+  boot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build kubo image locally
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: kubo:ci
+          cache-from: type=gha,scope=kubo
+
+      - name: Boot with no auth configured
+        run: |
+          set -eu
+          docker run -d --name kubo -p 5001:5001 kubo:ci
+          for i in $(seq 1 60); do
+            curl -fsS -X POST http://localhost:5001/api/v0/id >/dev/null 2>&1 && break
+            sleep 2
+          done
+          curl -fsS -X POST http://localhost:5001/api/v0/id | grep -q '"ID"' || {
+            docker logs kubo; exit 1
+          }
+
+      - name: Config matches the declared addresses
+        run: |
+          set -eu
+          cfg() { docker exec kubo ipfs --repo-dir=/data/ipfs config "$1"; }
+
+          echo "the API listens dual-stack, which Railway needs"
+          cfg Addresses.API | grep -q '/ip4/0.0.0.0/tcp/5001'
+          cfg Addresses.API | grep -q '/ip6/::/tcp/5001'
+
+          echo "routing and provide strategy are set"
+          [ "$(cfg Routing.Type)" = dht ]
+          [ "$(cfg Provide.Strategy)" = all ]
+
+      - name: Bearer auth mode locks the API down
+        run: |
+          set -eu
+          code() { curl -s -o /dev/null -w '%{http_code}' -X POST "$@"; }
+
+          # kubo.config.sh writes "bearer:${KUBO_API_AUTH_SECRET}", so the value
+          # here is the bare token, not a bearer:-prefixed one.
+          docker run -d --name kubo-auth \
+            -e KUBO_API_AUTH_SECRET=citoken \
+            -e 'KUBO_API_ALLOWED_PATHS=["/api/v0"]' \
+            -p 5002:5001 kubo:ci
+          for i in $(seq 1 60); do
+            [ "$(code http://localhost:5002/api/v0/id)" != 000 ] && break
+            sleep 2
+          done
+          [ "$(code http://localhost:5002/api/v0/id)" != 000 ] || {
+            docker logs kubo-auth; exit 1
+          }
+
+          echo "an unauthenticated call is rejected"
+          [ "$(code http://localhost:5002/api/v0/id)" = 403 ]
+
+          echo "the configured token is accepted"
+          [ "$(code -H 'Authorization: Bearer citoken' http://localhost:5002/api/v0/id)" = 200 ]
+
+      - name: Kubo logs on failure
+        if: failure()
+        run: |
+          docker logs kubo || true
+          docker logs kubo-auth || true
