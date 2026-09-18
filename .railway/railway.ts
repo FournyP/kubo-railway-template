@@ -21,9 +21,9 @@ const REPO = "FournyP/kubo-railway-template";
 const KUBO_SERVICE = "kubo";
 const DATA_VOLUME = "kubo-data";
 
-// Matches IPFS_PATH in the Dockerfile. Detaching this volume loses the node's
-// identity along with its blocks.
-const DATA_PATH = "/data/ipfs";
+// Kubo's repo directory, read as IPFS_PATH by the image and its init hooks.
+// Detaching this volume loses the node's identity along with its blocks.
+const IPFS_PATH = "/data/ipfs";
 
 /** Push the value from the local environment if present, else keep Railway's. */
 const fromEnvOrPreserve = (name: string) => process.env[name] ?? preserve();
@@ -35,14 +35,16 @@ export default defineRailway(() => {
     source: github(REPO, { branch: "main" }),
     build: { builder: "DOCKERFILE", dockerfilePath: "Dockerfile" },
     volumeMounts: {
-      [DATA_PATH]: data,
+      [IPFS_PATH]: data,
     },
     deploy: {
       // A second replica gets no volume and a second peer identity.
       numReplicas: 1,
     },
     env: {
-      DATA_PATH,
+      // Same value as the Dockerfile's ENV, declared so the mount path and the
+      // repo directory cannot drift apart.
+      IPFS_PATH,
 
       // Railway's private network is IPv6, its public proxy IPv4. Answer on both.
       KUBO_API_ADDRESSES: '["/ip4/0.0.0.0/tcp/5001", "/ip6/::/tcp/5001"]',

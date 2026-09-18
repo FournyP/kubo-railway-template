@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="100%" y2="0%">
+      <stop offset="0%" stop-color="#2f7f86"/>
+      <stop offset="100%" stop-color="#65C2CB"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Full canvas background -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- IPFS mark (24x24 viewBox) scaled x12 to 288x288, centered -->
+  <g transform="translate(112,112) scale(12)">
+    <path fill="#fff" d="M12 0L1.608 6v12L12 24l10.392-6V6zm-1.073 1.445h.001a1.8 1.8 0 002.138 0l7.534 4.35a1.794 1.794 0 000 .403l-7.535 4.35a1.8 1.8 0 00-2.137 0l-7.536-4.35a1.795 1.795 0 000-.402zM21.324 7.4c.109.08.226.147.349.201v8.7a1.8 1.8 0 00-1.069 1.852l-7.535 4.35a1.8 1.8 0 00-.349-.2l-.009-8.653a1.8 1.8 0 001.07-1.851zm-18.648.048l7.535 4.35a1.8 1.8 0 001.069 1.852v8.7c-.124.054-.24.122-.349.202l-7.535-4.35a1.8 1.8 0 00-1.069-1.852v-8.7c.124-.054.24-.122.35-.202z"/>
+  </g>
+</svg>

@@ -6,6 +6,14 @@ after the change itself when a release only touches this template. The format fo
 
 Before applying an update to a deployment that uses a volume, read [Upgrading](README.md#️-upgrading).
 
+## Repo path variable — 2026-09-18
+
+### Fixed
+
+- `railway.ts` declared `DATA_PATH`, which nothing in the image reads. It now declares
+  `IPFS_PATH`, the variable Kubo and the init hooks actually use, with the same value as the
+  Dockerfile. An apply removes the dead variable.
+
 ## Infrastructure as Code — 2026-09-06
 
 ### Added

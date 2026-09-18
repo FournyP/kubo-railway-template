@@ -1,18 +1,38 @@
 # IPFS Kubo Railway Template
 
-This example deploys a server of [Kubo](https://github.com/ipfs/kubo).
+Deploys [Kubo](https://github.com/ipfs/kubo) — the reference IPFS node — on Railway with a persistent volume for the repo, an authenticated RPC API and a swarm port reachable through a TCP proxy.
 
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/kubo?referralCode=C3Uv6n&utm_medium=integration&utm_source=template&utm_campaign=generic)
 
+## 🏗️ Architecture
+
+```
+client ──Authorization: Bearer <secret>──► kubo :5001 (RPC API, public domain)
+peers  ──libp2p──────────────────────────► kubo :4001 (swarm, TCP proxy)
+                                              │
+                                              ▼
+                                        kubo-data volume (/data/ipfs)
+```
+
+One Railway service, `kubo`, built from the official `ipfs/kubo` image at a pinned tag (see `Dockerfile`). Listen addresses, the announce address and API authorization are applied through Kubo's `/container-init.d` hooks on every start, so the official entrypoint and CMD are untouched. The repo lives on a Railway volume, so blocks, pins and the peer identity survive redeploys.
+
 ## ✨ Features
 
-- Kubo
+- Official Kubo image at a pinned tag
+- Repo on a persistent volume, ownership fixed on first boot
+- RPC API behind Kubo's own `API.Authorizations`: a single bearer token, or a full per-user rule set
+- Dual-stack listen addresses, matching Railway's IPv4 proxy and IPv6 private network
+- Pin migration script for moving to a new node
 
 ## 💁‍♀️ How to use
 
-- Click the Railway button 👆
-- Fill in the variables
-- Deploy! 🚄
+1. Click the Railway button 👆
+2. Fill in the variables (see below)
+3. Deploy! 🚄
+4. Add a TCP proxy on port `4001` in the dashboard and put the address it gives you in `KUBO_ANNOUNCE`, so other peers can reach the node. Then:
+   ```bash
+   curl -X POST -H "Authorization: Bearer <secret>" https://<kubo-domain>/api/v0/id
+   ```
 
 ## 🧱 Infrastructure as Code
 
@@ -45,6 +65,23 @@ service names differ, and a mismatch is a delete and recreate, not a rename.
 ## ⬆️ Upgrading
 
 Railway template updates are opt-in — an existing deployment keeps running until you apply the update. See the [changelog](CHANGELOG.md) for what each update contains.
+
+## 🔧 Variables
+
+| Variable                      | Required | Description                                                                                                                      |
+| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `KUBO_API_AUTH_SECRET`        | one of   | Single bearer token for the RPC API (mode A). Generate with `openssl rand -hex 32`.                                              |
+| `KUBO_API_AUTHORIZATIONS`     | one of   | Full `API.Authorizations` JSON object (mode B). Wins over mode A when set.                                                       |
+| `KUBO_API_ALLOWED_PATHS`      | no       | JSON array of paths the mode A token may call, default `["/api/v0"]`.                                                            |
+| `KUBO_ANNOUNCE`               | no       | Multiaddr announced to peers, e.g. `/dns/<tcp-proxy-domain>/tcp/<tcp-proxy-port>`. The default is only reachable inside Railway. |
+| `KUBO_API_ADDRESSES`          | no       | JSON array of RPC API listen addresses, default `["/ip4/0.0.0.0/tcp/5001", "/ip6/::/tcp/5001"]`.                                 |
+| `KUBO_SWARM_TCP_ADDRESS_IPV4` | no       | Default `/ip4/0.0.0.0/tcp/4001`.                                                                                                 |
+| `KUBO_SWARM_TCP_ADDRESS_IPV6` | no       | Default `/ip6/::/tcp/4001`.                                                                                                      |
+| `KUBO_SWARM_UDP_ADDRESS_IPV4` | no       | Default `/ip4/0.0.0.0/udp/4001/quic`.                                                                                            |
+| `KUBO_SWARM_UDP_ADDRESS_IPV6` | no       | Default `/ip6/::/udp/4001/quic`.                                                                                                 |
+| `IPFS_PATH`                   | no       | Kubo's repo directory, default `/data/ipfs`. Must be the volume's mount path.                                                    |
+
+Leave the API unauthenticated and anyone who finds the domain owns the node. Set one of the two auth modes before giving the service a public domain.
 
 ## 🔐 Authentication
 
