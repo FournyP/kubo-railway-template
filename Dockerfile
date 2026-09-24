@@ -1,4 +1,4 @@
-FROM ipfs/kubo:v0.41.0
+FROM ipfs/kubo:v0.43.1
 
 ENV IPFS_PATH=/data/ipfs
 ENV KUBO_SWARM_TCP_ADDRESS_IPV4=/ip4/0.0.0.0/tcp/4001
