@@ -8,6 +8,7 @@ Deploys [Kubo](https://github.com/ipfs/kubo) — the reference IPFS node — on 
 
 ```
 client ──Authorization: Bearer <secret>──► kubo :5001 (RPC API, public domain)
+browser ─GET /ipfs/<cid>─────────────────► kubo :8080 (gateway, optional domain)
 peers  ──libp2p──────────────────────────► kubo :4001 (swarm, TCP proxy)
                                               │
                                               ▼
@@ -22,6 +23,7 @@ One Railway service, `kubo`, built from the official `ipfs/kubo` image at a pinn
 - Repo on a persistent volume, ownership fixed on first boot
 - RPC API behind Kubo's own `API.Authorizations`: a single bearer token, or a full per-user rule set
 - Dual-stack listen addresses, matching Railway's IPv4 proxy and IPv6 private network
+- HTTP gateway that serves only the node's own content, safe to put behind a public domain
 - Pin migration script for moving to a new node
 
 ## 💁‍♀️ How to use
@@ -33,6 +35,7 @@ One Railway service, `kubo`, built from the official `ipfs/kubo` image at a pinn
    ```bash
    curl -X POST -H "Authorization: Bearer <secret>" https://<kubo-domain>/api/v0/id
    ```
+5. Optional: add a second domain with target port `8080` to serve pinned content over HTTP (see [Gateway](#-gateway)).
 
 ## 🧱 Infrastructure as Code
 
@@ -75,6 +78,8 @@ Railway template updates are opt-in — an existing deployment keeps running unt
 | `KUBO_API_ALLOWED_PATHS`      | no       | JSON array of paths the mode A token may call, default `["/api/v0"]`.                                                            |
 | `KUBO_ANNOUNCE`               | no       | Multiaddr announced to peers, e.g. `/dns/<tcp-proxy-domain>/tcp/<tcp-proxy-port>`. The default is only reachable inside Railway. |
 | `KUBO_API_ADDRESSES`          | no       | JSON array of RPC API listen addresses, default `["/ip4/0.0.0.0/tcp/5001", "/ip6/::/tcp/5001"]`.                                 |
+| `KUBO_GATEWAY_ADDRESSES`      | no       | JSON array of gateway listen addresses, default `["/ip4/0.0.0.0/tcp/8080", "/ip6/::/tcp/8080"]`.                                 |
+| `KUBO_GATEWAY_NO_FETCH`       | no       | `true` (default) serves only blocks already on the node; `false` fetches any CID from the network for any caller.                |
 | `KUBO_SWARM_TCP_ADDRESS_IPV4` | no       | Default `/ip4/0.0.0.0/tcp/4001`.                                                                                                 |
 | `KUBO_SWARM_TCP_ADDRESS_IPV6` | no       | Default `/ip6/::/tcp/4001`.                                                                                                      |
 | `KUBO_SWARM_UDP_ADDRESS_IPV4` | no       | Default `/ip4/0.0.0.0/udp/4001/quic`.                                                                                            |
@@ -113,6 +118,20 @@ no read privacy, so encrypt sensitive data before adding.
 `KUBO_API_ADDRESSES` (JSON array) defaults to
 `["/ip4/0.0.0.0/tcp/5001", "/ip6/::/tcp/5001"]` — keep both on Railway (the
 public proxy is IPv4, the private network IPv6).
+
+## 🌍 Gateway
+
+The HTTP gateway (port `8080`) is read-only and has **no authentication**, so it can
+sit behind a public domain without exposing the RPC token. Railway routes each domain
+to its own target port: keep the RPC domain on `5001` and add a second one on `8080`.
+
+```bash
+curl https://<gateway-domain>/ipfs/<cid>
+```
+
+`KUBO_GATEWAY_NO_FETCH=true` (the default) makes it answer only for blocks the node
+already holds, so strangers cannot use your node to fetch arbitrary content. Set it to
+`false` only on a gateway that is not publicly reachable.
 
 ## 🔁 Pin migration
 

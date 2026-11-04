@@ -6,6 +6,20 @@ after the change itself when a release only touches this template. The format fo
 
 Before applying an update to a deployment that uses a volume, read [Upgrading](README.md#️-upgrading).
 
+## Public gateway — 2026-11-04
+
+### Added
+
+- `KUBO_GATEWAY_ADDRESSES`: the gateway now listens dual-stack on `8080`, like the RPC API.
+- `KUBO_GATEWAY_NO_FETCH`, default `true`: the gateway serves only blocks already on the
+  node, so it can take a public domain without becoming an open gateway. See
+  [Gateway](README.md#-gateway).
+
+### Upgrade notes
+
+- A gateway that used to fetch missing content from the network now returns an error
+  for it. Set `KUBO_GATEWAY_NO_FETCH=false` to keep the old behavior.
+
 ## Repo path variable — 2026-09-18
 
 ### Fixed
