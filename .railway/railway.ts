@@ -53,6 +53,11 @@ export default defineRailway(() => {
       KUBO_SWARM_UDP_ADDRESS_IPV4: "/ip4/0.0.0.0/udp/4001/quic",
       KUBO_SWARM_UDP_ADDRESS_IPV6: "/ip6/::/udp/4001/quic",
 
+      // The gateway is unauthenticated, so by default it serves only blocks the
+      // node already has; "false" makes it fetch any CID for anyone.
+      KUBO_GATEWAY_ADDRESSES: '["/ip4/0.0.0.0/tcp/8080", "/ip6/::/tcp/8080"]',
+      KUBO_GATEWAY_NO_FETCH: process.env.KUBO_GATEWAY_NO_FETCH ?? "true",
+
       // What peers are told to dial. Set this to the TCP proxy's address once
       // you add one; preserved so an apply does not revert it to the default,
       // which is only reachable inside Railway.

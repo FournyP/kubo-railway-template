@@ -8,11 +8,15 @@ echo "KUBO_SWARM_UDP_ADDRESS_IPV4: $KUBO_SWARM_UDP_ADDRESS_IPV4"
 echo "KUBO_SWARM_UDP_ADDRESS_IPV6: $KUBO_SWARM_UDP_ADDRESS_IPV6"
 echo "KUBO_ANNOUNCE: $KUBO_ANNOUNCE"
 echo "KUBO_API_ADDRESSES: $KUBO_API_ADDRESSES"
+echo "KUBO_GATEWAY_ADDRESSES: $KUBO_GATEWAY_ADDRESSES"
+echo "KUBO_GATEWAY_NO_FETCH: $KUBO_GATEWAY_NO_FETCH"
 echo "IPFS_PATH: $IPFS_PATH"
 
 ipfs --repo-dir="$IPFS_PATH" config Addresses.Swarm "[\"${KUBO_SWARM_TCP_ADDRESS_IPV4}\", \"${KUBO_SWARM_TCP_ADDRESS_IPV6}\", \"${KUBO_SWARM_UDP_ADDRESS_IPV4}\", \"${KUBO_SWARM_UDP_ADDRESS_IPV6}\"]" --json
 ipfs --repo-dir="$IPFS_PATH" config Addresses.Announce "[\"${KUBO_ANNOUNCE}\"]" --json
 ipfs --repo-dir="$IPFS_PATH" config Addresses.API "$KUBO_API_ADDRESSES" --json
+ipfs --repo-dir="$IPFS_PATH" config Addresses.Gateway "$KUBO_GATEWAY_ADDRESSES" --json
+ipfs --repo-dir="$IPFS_PATH" config Gateway.NoFetch "$KUBO_GATEWAY_NO_FETCH" --json
 ipfs --repo-dir="$IPFS_PATH" config Routing.Type "dht"
 ipfs --repo-dir="$IPFS_PATH" config Provide.DHT.Interval "30m"
 ipfs --repo-dir="$IPFS_PATH" config Provide.Strategy "all"

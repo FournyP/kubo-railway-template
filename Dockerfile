@@ -7,13 +7,15 @@ ENV KUBO_SWARM_UDP_ADDRESS_IPV4=/ip4/0.0.0.0/udp/4001/quic
 ENV KUBO_SWARM_UDP_ADDRESS_IPV6=/ip6/::/udp/4001/quic
 ENV KUBO_ANNOUNCE=/ip4/0.0.0.0/tcp/4001
 ENV KUBO_API_ADDRESSES='["/ip4/0.0.0.0/tcp/5001", "/ip6/::/tcp/5001"]'
+ENV KUBO_GATEWAY_ADDRESSES='["/ip4/0.0.0.0/tcp/8080", "/ip6/::/tcp/8080"]'
+ENV KUBO_GATEWAY_NO_FETCH=true
 
 COPY --chmod=755 entrypoint.override.sh /entrypoint.override.sh
 
 COPY --chmod=755 kubo.migrate.sh /container-init.d/00-kubo-migrate.sh
 COPY --chmod=755 kubo.config.sh /container-init.d/10-kubo-config.sh
 
-EXPOSE 4001 5001
+EXPOSE 4001 5001 8080
 
 ENTRYPOINT [ "/entrypoint.override.sh" ]
 CMD ["daemon", "--agent-version-suffix=docker"]
